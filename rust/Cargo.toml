@@ -105,3 +105,27 @@ c-headers = ["safer-ffi/headers"]
 # This feature enables a fixed number of discarded rows for TreeR. The `FIL_PROOFS_ROWS_TO_DISCARD`
 # setting is ignored, no `TemporaryAux` file will be written.
 fixed-rows-to-discard = ["filecoin-proofs-api/fixed-rows-to-discard"]
+
+# ============================================================================
+# SIMULATION SUPPORT (for eth_call/eth_estimateGas from EVM contract addresses)
+# ============================================================================
+# Enable ApplyKind::Simulation support. This requires a patched ref-fvm that
+# includes the Simulation variant in ApplyKind.
+#
+# To use with local ref-fvm development:
+# 1. Uncomment the [patch.crates-io] section below
+# 2. Build with: FFI_USE_SIMULATION=1 make
+#    (or manually: cargo build --features simulation)
+#
+# When this feature is disabled (default), simulation requests (apply_kind=2)
+# fall back to ApplyKind::Implicit behavior.
+simulation = []
+
+# ============================================================================
+# REMOTE ref-fvm WITH SIMULATION SUPPORT
+# ============================================================================
+[patch.crates-io]
+fvm = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender" }
+fvm_shared = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender" }
+fvm_ipld_encoding = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender" }
+fvm_ipld_blockstore = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender" }

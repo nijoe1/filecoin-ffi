@@ -218,12 +218,6 @@ build_from_source() {
         fi
     fi
 
-    # Use -no-fvm GPU feature variants when FVM is disabled
-    if [ -n "${FFI_DISABLE_FVM}" ] && [ -n "${gpu_flags}" ]; then
-        echo "FFI_DISABLE_FVM is set, using no-fvm GPU variant"
-        gpu_flags="${gpu_flags}-no-fvm"
-    fi
-
     # Default to use multicore_sdr flags, unless specified to disable
     use_multicore_sdr="multicore-sdr"
     if [ "${FFI_USE_MULTICORE_SDR}" == "0" ]; then
@@ -238,24 +232,20 @@ build_from_source() {
         use_fixed_rows_to_discard=",fixed-rows-to-discard"
     fi
 
-    # Collect features into an array, stripping leading commas as we go
-    features=()
-    [ -n "${use_multicore_sdr}" ] && features+=("${use_multicore_sdr}")
-
-    [ -n "${gpu_flags}" ] && features+=("${gpu_flags#,}")
-    [ -z "${FFI_DISABLE_FVM}" ] && features+=("fvm")
-    [ -n "${use_fixed_rows_to_discard}" ] && features+=("${use_fixed_rows_to_discard#,}")
-    if [ "${FFI_USE_BLST_PORTABLE}" == "1" ] || [ "${FFI_PORTABLE}" == "1" ]; then
-        features+=("blst-portable")
+    # Enable ApplyKind::Simulation support for eth_call/eth_estimateGas from
+    # EVM contract addresses. Requires patched ref-fvm with Simulation variant.
+    use_simulation=""
+    if [ "${FFI_USE_SIMULATION}" == "1" ]; then
+        use_simulation=",simulation"
+        (>&2 echo "[build_from_source] Simulation mode enabled (requires patched ref-fvm)")
     fi
 
-    # Join features with commas
-    feature_list=$(IFS=','; printf '%s' "${features[*]}")
-
-    if [ -n "${feature_list}" ]; then
-        additional_flags="--no-default-features --features ${feature_list}"
+    additional_flags=""
+    # Add feature specific rust flags as needed here.
+    if [ "${FFI_USE_BLST_PORTABLE}" == "1" ] || [ "${FFI_PORTABLE}" == "1" ]; then
+        additional_flags="${additional_flags} --no-default-features --features ${use_multicore_sdr},blst-portable${gpu_flags}${use_fixed_rows_to_discard}${use_simulation}"
     else
-        additional_flags="--no-default-features"
+        additional_flags="${additional_flags} --no-default-features --features ${use_multicore_sdr}${gpu_flags}${use_fixed_rows_to_discard}${use_simulation}"
     fi
 
     echo "Using additional build flags: ${additional_flags}"

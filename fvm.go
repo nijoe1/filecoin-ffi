@@ -31,6 +31,7 @@ type FVM struct {
 const (
 	applyExplicit = iota
 	applyImplicit
+	applySimulation
 )
 
 type FVMOpts struct {
@@ -145,6 +146,24 @@ func (f *FVM) ApplyImplicitMessage(msgBytes []byte) (*ApplyRet, error) {
 		cgo.AsSliceRefUint8(msgBytes),
 		0, // this isn't an on-chain message, so it has no chain length.
 		applyImplicit,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return buildResponse(resp)
+}
+
+// ApplyMessageForSimulation applies a message for simulation purposes (eth_call/eth_estimateGas).
+// This mode skips sender type validation, allowing calls from any actor type (including EVM contracts),
+// but still validates nonce and balance.
+func (f *FVM) ApplyMessageForSimulation(msgBytes []byte, chainLen uint) (*ApplyRet, error) {
+	defer runtime.KeepAlive(f)
+	resp, err := cgo.FvmMachineExecuteMessage(
+		f.executor,
+		cgo.AsSliceRefUint8(msgBytes),
+		uint64(chainLen),
+		applySimulation,
 	)
 	if err != nil {
 		return nil, err

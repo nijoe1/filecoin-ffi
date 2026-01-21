@@ -267,6 +267,10 @@ mod v3 {
                 },
                 match apply_kind {
                     ApplyKind::Explicit => ApplyKind3::Explicit,
+                    // fvm3 doesn't have Simulation, fall back to Implicit
+                    #[cfg(feature = "simulation")]
+                    ApplyKind::Implicit | ApplyKind::Simulation => ApplyKind3::Implicit,
+                    #[cfg(not(feature = "simulation"))]
                     ApplyKind::Implicit => ApplyKind3::Implicit,
                 },
                 raw_length,
@@ -550,6 +554,10 @@ mod v2 {
                 },
                 match apply_kind {
                     ApplyKind::Explicit => ApplyKind2::Explicit,
+                    // fvm2 doesn't have Simulation, fall back to Implicit
+                    #[cfg(feature = "simulation")]
+                    ApplyKind::Implicit | ApplyKind::Simulation => ApplyKind2::Implicit,
+                    #[cfg(not(feature = "simulation"))]
                     ApplyKind::Implicit => ApplyKind2::Implicit,
                 },
                 raw_length,
