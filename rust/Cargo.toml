@@ -33,14 +33,14 @@ rayon = "1.10.0"
 anyhow = "1.0.97"
 serde_json = "1.0.140"
 rust-gpu-tools = { version = "0.7", optional = true, default-features = false }
-fvm4 = { package = "fvm", version = "~4.7.4", default-features = false, features = ["verify-signature", "nv28-dev"], optional = true  }
-fvm4_shared = { package = "fvm_shared", version = "~4.7.4", optional = true  }
-fvm3 = { package = "fvm", version = "~3.13.0", default-features = false, optional = true  }
-fvm3_shared = { package = "fvm_shared", version = "~3.13.0", optional = true  }
-fvm2 = { package = "fvm", version = "~2.11.0", default-features = false, optional = true  }
-fvm2_shared = { package = "fvm_shared", version = "~2.11.0", optional = true  }
-fvm_ipld_encoding = { version = "0.5.3", optional = true  }
-fvm_ipld_blockstore = { version = "0.3.1", optional = true }
+fvm4 = { package = "fvm", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5", default-features = false, features = ["verify-signature", "nv28-dev"], optional = true }
+fvm4_shared = { package = "fvm_shared", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5", optional = true }
+fvm3 = { package = "fvm", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v3.13.3", default-features = false, optional = true }
+fvm3_shared = { package = "fvm_shared", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v3.13.3", optional = true }
+fvm2 = { package = "fvm", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v2.11.3", default-features = false, optional = true }
+fvm2_shared = { package = "fvm_shared", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v2.11.3", optional = true }
+fvm_ipld_encoding = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5", optional = true }
+fvm_ipld_blockstore = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5", optional = true }
 num-traits = "0.2.19"
 cid = { version = "0.11.1", features = ["serde"], default-features = false }
 lazy_static = "1.5.0"
@@ -121,11 +121,15 @@ fixed-rows-to-discard = ["filecoin-proofs-api/fixed-rows-to-discard"]
 # fall back to ApplyKind::Implicit behavior.
 simulation = []
 
-# ============================================================================
-# REMOTE ref-fvm WITH SIMULATION SUPPORT
-# ============================================================================
+## ============================================================================
+## REMOTE ref-fvm WITH SIMULATION SUPPORT
+## ============================================================================
+##
+## We depend on three FVM major/minor lines simultaneously (2.11.x, 3.13.x, 4.7.x).
+## Cargo `[patch.crates-io]` can only select one source per crate name, so we pin
+## `fvm2/fvm3/fvm4` (and their `_shared`) directly to version-specific git branches.
+
 [patch.crates-io]
-fvm = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender", path = "fvm" }
-fvm_shared = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender", path = "shared" }
-fvm_ipld_encoding = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender", path = "ipld/encoding" }
-fvm_ipld_blockstore = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender", path = "ipld/blockstore" }
+# Ensure we don't end up with duplicate (registry + git) versions of these crates.
+fvm_ipld_encoding = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5" }
+fvm_ipld_blockstore = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5" }
