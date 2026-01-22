@@ -261,10 +261,18 @@ fn fvm_machine_execute_message(
 ) -> repr_c::Box<Result<FvmMachineExecuteResponse>> {
     // Execute in the thread-pool because we need a 64MiB stack.
     with_new_stack("fvm_machine_execute_message", &THREAD_POOL, || {
-        let apply_kind = if apply_kind == 0 {
-            ApplyKind::Explicit
-        } else {
-            ApplyKind::Implicit
+        // Map apply_kind values:
+        //   0 = Explicit (normal on-chain messages)
+        //   1 = Implicit (cron, rewards, etc.)
+        //   2 = Simulation (eth_call/eth_estimateGas - skips sender type validation)
+        //
+        // Simulation mode requires the "simulation" feature and a patched ref-fvm.
+        // When disabled, simulation requests (apply_kind=2) fall back to Implicit.
+        let apply_kind = match apply_kind {
+            0 => ApplyKind::Explicit,
+            #[cfg(feature = "simulation")]
+            2 => ApplyKind::Simulation,
+            _ => ApplyKind::Implicit,
         };
 
         let message: Message = fvm_ipld_encoding::from_slice(&message)?;
