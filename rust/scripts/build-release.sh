@@ -61,7 +61,7 @@ main() {
         # shellcheck disable=SC2068 # the rest of the parameters should be split
         RUSTFLAGS="${__rust_flags}" \
             cargo build \
-            --release --offline --target ${__target} ${@:2} ${__extra_features} 2>&1 \
+            --release --locked --target ${__target} ${@:2} ${__extra_features} 2>&1 \
             | tee ${__build_output_log_tmp}
 
         # Create the universal binary/

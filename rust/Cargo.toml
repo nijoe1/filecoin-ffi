@@ -33,24 +33,14 @@ rayon = "1.10.0"
 anyhow = "1.0.97"
 serde_json = "1.0.140"
 rust-gpu-tools = { version = "0.7", optional = true, default-features = false }
-#
-# NOTE: Lotus builds this vendored tree with `cargo ... --locked`.
-# To avoid lockfile drift (and duplicate crates from mixed sources), we pin:
-# - fvm2/fvm3/fvm4 (+ their fvm_shared) directly to versioned git branches.
-# - fvm_ipld_* to a single git source via deps + an ipld-only [patch.crates-io].
-#
-# Update the repo/branches below to match your ref-fvm fork.
-#
-fvm4 = { package = "fvm", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5", default-features = false, features = ["verify-signature", "nv28-dev"], optional = true  }
-fvm4_shared = { package = "fvm_shared", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5", optional = true  }
-fvm3 = { package = "fvm", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v3.13.3", default-features = false, optional = true  }
-fvm3_shared = { package = "fvm_shared", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v3.13.3", optional = true  }
-fvm2 = { package = "fvm", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v2.11.3", default-features = false, optional = true  }
-fvm2_shared = { package = "fvm_shared", git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v2.11.3", optional = true  }
-
-# IPLD crates must resolve from a single source (avoid registry+git duplicates).
-fvm_ipld_encoding = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5", optional = true  }
-fvm_ipld_blockstore = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5", optional = true }
+fvm4 = { package = "fvm", version = "~4.7.4", default-features = false, features = ["verify-signature", "nv28-dev"], optional = true  }
+fvm4_shared = { package = "fvm_shared", version = "~4.7.4", optional = true  }
+fvm3 = { package = "fvm", version = "~3.13.0", default-features = false, optional = true  }
+fvm3_shared = { package = "fvm_shared", version = "~3.13.0", optional = true  }
+fvm2 = { package = "fvm", version = "~2.11.0", default-features = false, optional = true  }
+fvm2_shared = { package = "fvm_shared", version = "~2.11.0", optional = true  }
+fvm_ipld_encoding = { version = "0.5.3", optional = true  }
+fvm_ipld_blockstore = { version = "0.3.1", optional = true }
 num-traits = "0.2.19"
 cid = { version = "0.11.1", features = ["serde"], default-features = false }
 lazy_static = "1.5.0"
@@ -115,31 +105,3 @@ c-headers = ["safer-ffi/headers"]
 # This feature enables a fixed number of discarded rows for TreeR. The `FIL_PROOFS_ROWS_TO_DISCARD`
 # setting is ignored, no `TemporaryAux` file will be written.
 fixed-rows-to-discard = ["filecoin-proofs-api/fixed-rows-to-discard"]
-
-# ============================================================================
-# SIMULATION SUPPORT (for eth_call/eth_estimateGas from EVM contract addresses)
-# ============================================================================
-# Enable ApplyKind::Simulation support. This requires a patched ref-fvm that
-# includes the Simulation variant in ApplyKind.
-#
-# To use with local ref-fvm development:
-# 1. Uncomment the [patch.crates-io] section below
-# 2. Build with: FFI_USE_SIMULATION=1 make
-#    (or manually: cargo build --features simulation)
-#
-# When this feature is disabled (default), simulation requests (apply_kind=2)
-# fall back to ApplyKind::Implicit behavior.
-simulation = []
-
-# ============================================================================
-# REMOTE ref-fvm WITH SIMULATION SUPPORT
-# ============================================================================
-[patch.crates-io]
-#
-# IMPORTANT: keep this patch list minimal. Cargo allows only one patch per crate
-# name, and Lotus needs to depend on multiple FVM majors simultaneously (v2/v3/v4),
-# so those are pinned directly as git deps above. We patch only the IPLD crates
-# to force a single source across the full dependency graph.
-#
-fvm_ipld_encoding = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5" }
-fvm_ipld_blockstore = { git = "https://github.com/nijoe1/ref-fvm", branch = "feat/ignore-sender-v4.7.5" }

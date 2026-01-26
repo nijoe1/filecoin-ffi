@@ -31,7 +31,6 @@ type FVM struct {
 const (
 	applyExplicit = iota
 	applyImplicit
-	applySimulation
 )
 
 type FVMOpts struct {
@@ -163,7 +162,7 @@ func (f *FVM) ApplyMessageForSimulation(msgBytes []byte, chainLen uint) (*ApplyR
 		f.executor,
 		cgo.AsSliceRefUint8(msgBytes),
 		uint64(chainLen),
-		applySimulation,
+		applyImplicit,
 	)
 	if err != nil {
 		return nil, err

@@ -268,7 +268,6 @@ mod v3 {
                 match apply_kind {
                     ApplyKind::Explicit => ApplyKind3::Explicit,
                     ApplyKind::Implicit => ApplyKind3::Implicit,
-                    ApplyKind::Simulation => ApplyKind3::Simulation,
                 },
                 raw_length,
             );
@@ -552,7 +551,6 @@ mod v2 {
                 match apply_kind {
                     ApplyKind::Explicit => ApplyKind2::Explicit,
                     ApplyKind::Implicit => ApplyKind2::Implicit,
-                    ApplyKind::Simulation => ApplyKind2::Simulation,
                 },
                 raw_length,
             );
